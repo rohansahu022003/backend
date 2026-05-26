@@ -1,12 +1,11 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import torch
 
 app = FastAPI()
 
 # Hugging Face Model Repository
-model_name = "rohansahu02/bart-large-summarizer"
+model_name = "facebook/bart-base"
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -32,8 +31,8 @@ def summarize(req: SummaryRequest):
 
     summary_ids = model.generate(
         inputs["input_ids"],
-        max_length=200,
-        min_length=50,
+        max_length=120,
+        min_length=30,
         length_penalty=2.0,
         num_beams=4,
         early_stopping=True
