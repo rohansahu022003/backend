@@ -7,7 +7,7 @@ app = FastAPI()
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-API_URL = "https://api-inference.huggingface.co/models/t5-small"
+API_URL = "https://router.huggingface.co/hf-inference/models/t5-small"
 
 headers = {
     "Authorization": f"Bearer {HF_TOKEN}"
