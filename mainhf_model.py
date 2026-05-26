@@ -1,14 +1,17 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import requests
+import os
 
 app = FastAPI()
 
-model_name = "t5-small"
+HF_TOKEN = os.getenv("HF_TOKEN")
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+API_URL = "https://api-inference.huggingface.co/models/t5-small"
 
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+headers = {
+    "Authorization": f"Bearer {HF_TOKEN}"
+}
 
 class SummaryRequest(BaseModel):
     text: str
@@ -16,27 +19,22 @@ class SummaryRequest(BaseModel):
 @app.post("/summarize")
 def summarize(req: SummaryRequest):
 
-    input_text = "summarize: " + req.text
+    payload = {
+        "inputs": "summarize: " + req.text
+    }
 
-    inputs = tokenizer(
-        input_text,
-        return_tensors="pt",
-        max_length=512,
-        truncation=True
+    response = requests.post(
+        API_URL,
+        headers=headers,
+        json=payload
     )
 
-    summary_ids = model.generate(
-        inputs["input_ids"],
-        max_length=80,
-        min_length=20,
-        num_beams=2,
-        early_stopping=True
-    )
+    result = response.json()
 
-    summary = tokenizer.decode(
-        summary_ids[0],
-        skip_special_tokens=True
-    )
+    try:
+        summary = result[0]["summary_text"]
+    except:
+        summary = str(result)
 
     return {
         "summary": summary
