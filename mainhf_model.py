@@ -7,10 +7,10 @@ app = FastAPI()
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-API_URL = "https://router.huggingface.co/hf-inference/models/t5-small"
+API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
 
 headers = {
-    "Authorization": f"Bearer {HF_TOKEN}"
+    "Authorization": "Bearer " + HF_TOKEN
 }
 
 class SummaryRequest(BaseModel):
@@ -24,14 +24,14 @@ def home():
 def summarize(req: SummaryRequest):
 
     payload = {
-        "inputs": "summarize: " + req.text
+        "inputs": req.text
     }
 
     response = requests.post(
         API_URL,
         headers=headers,
         json=payload,
-        timeout=60
+        timeout=120
     )
 
     result = response.json()
@@ -40,7 +40,7 @@ def summarize(req: SummaryRequest):
 
     if isinstance(result, list):
         return {
-            "summary": result[0].get("summary_text", "No summary generated")
+            "summary": result[0]["summary_text"]
         }
 
     return {
