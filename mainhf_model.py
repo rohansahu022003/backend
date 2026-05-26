@@ -16,6 +16,10 @@ headers = {
 class SummaryRequest(BaseModel):
     text: str
 
+@app.get("/")
+def home():
+    return {"message": "Backend running"}
+
 @app.post("/summarize")
 def summarize(req: SummaryRequest):
 
@@ -26,16 +30,19 @@ def summarize(req: SummaryRequest):
     response = requests.post(
         API_URL,
         headers=headers,
-        json=payload
+        json=payload,
+        timeout=60
     )
 
     result = response.json()
 
-    try:
-        summary = result[0]["summary_text"]
-    except:
-        summary = str(result)
+    print(result)
+
+    if isinstance(result, list):
+        return {
+            "summary": result[0].get("summary_text", "No summary generated")
+        }
 
     return {
-        "summary": summary
+        "error": result
     }
