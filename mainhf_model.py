@@ -4,37 +4,32 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 app = FastAPI()
 
-# Hugging Face Model Repository
-model_name = "facebook/bart-base"
+model_name = "t5-small"
 
-# Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-model = AutoModelForSeq2SeqLM.from_pretrained(
-    model_name
-)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
-# Request body
 class SummaryRequest(BaseModel):
     text: str
 
-# Summarization endpoint
 @app.post("/summarize")
 def summarize(req: SummaryRequest):
 
+    input_text = "summarize: " + req.text
+
     inputs = tokenizer(
-        req.text,
+        input_text,
         return_tensors="pt",
-        max_length=1024,
+        max_length=512,
         truncation=True
     )
 
     summary_ids = model.generate(
         inputs["input_ids"],
-        max_length=120,
-        min_length=30,
-        length_penalty=2.0,
-        num_beams=4,
+        max_length=80,
+        min_length=20,
+        num_beams=2,
         early_stopping=True
     )
 
